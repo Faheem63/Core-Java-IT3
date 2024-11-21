@@ -1,0 +1,224 @@
+import java.util.*;
+
+// Abstract class representing a library item
+abstract class LibraryItem {
+    protected String title;
+    protected String itemID;
+    protected boolean isAvailable;
+
+    public LibraryItem(String title, String itemID) {
+        this.title = title;
+        this.itemID = itemID;
+        this.isAvailable = true; // All items are available by default
+    }
+
+    // Abstract methods for borrowing and returning items
+    public abstract void borrow() throws ItemNotAvailableException;
+    public abstract void returnItem();
+
+    // Getters
+    public String getTitle() {
+        return title;
+    }
+
+    public String getItemID() {
+        return itemID;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    // Overridden toString for displaying item details
+    @Override
+    public String toString() {
+        return "Title: " + title + ", ItemID: " + itemID + ", Available: " + isAvailable;
+    }
+}
+
+// Concrete subclass representing a Book
+class Book extends LibraryItem {
+    private String author;
+    private String genre;
+
+    public Book(String title, String itemID, String author, String genre) {
+        super(title, itemID);
+        this.author = author;
+        this.genre = genre;
+    }
+
+    @Override
+    public void borrow() throws ItemNotAvailableException {
+        if (!isAvailable) {
+            throw new ItemNotAvailableException("The book \"" + title + "\" is not available.");
+        }
+        isAvailable = false;
+        System.out.println("The book \"" + title + "\" has been borrowed.");
+    }
+
+    @Override
+    public void returnItem() {
+        isAvailable = true;
+        System.out.println("The book \"" + title + "\" has been returned.");
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", Author: " + author + ", Genre: " + genre;
+    }
+}
+
+// Concrete subclass representing a DVD
+class DVD extends LibraryItem {
+    private String director;
+    private int duration; // in minutes
+
+    public DVD(String title, String itemID, String director, int duration) {
+        super(title, itemID);
+        this.director = director;
+        this.duration = duration;
+    }
+
+    @Override
+    public void borrow() throws ItemNotAvailableException {
+        if (!isAvailable) {
+            throw new ItemNotAvailableException("The DVD \"" + title + "\" is not available.");
+        }
+        isAvailable = false;
+        System.out.println("The DVD \"" + title + "\" has been borrowed.");
+    }
+
+    @Override
+    public void returnItem() {
+        isAvailable = true;
+        System.out.println("The DVD \"" + title + "\" has been returned.");
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", Director: " + director + ", Duration: " + duration + " mins";
+    }
+}
+
+// Custom exception for unavailable items
+class ItemNotAvailableException extends Exception {
+    public ItemNotAvailableException(String message) {
+        super(message);
+    }
+}
+
+// Library class to manage library items
+class Library {
+    private List<LibraryItem> items;
+
+    public Library() {
+        items = new ArrayList<>();
+    }
+
+    // Add an item to the library
+    public void addItem(LibraryItem item) {
+        items.add(item);
+    }
+
+    // Search for items by title
+    public LibraryItem search(String title) {
+        for (LibraryItem item : items) {
+            if (item.getTitle().equalsIgnoreCase(title)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    // Search for items by ID
+    public LibraryItem searchByID(String itemID) {
+        for (LibraryItem item : items) {
+            if (item.getItemID().equals(itemID)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    // Display all items grouped by type
+    public void displayAllItems() {
+        System.out.println("Books:");
+        for (LibraryItem item : items) {
+            if (item instanceof Book) {
+                System.out.println(item);
+            }
+        }
+        System.out.println("DVDs:");
+        for (LibraryItem item : items) {
+            if (item instanceof DVD) {
+                System.out.println(item);
+            }
+        }
+    }
+
+    // Borrow an item
+    public void borrowItem(String title) {
+        LibraryItem item = search(title);
+        if (item == null) {
+            System.out.println("Item not found.");
+            return;
+        }
+        try {
+            item.borrow();
+        } catch (ItemNotAvailableException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            System.out.println("Attempted to borrow \"" + title + "\".");
+        }
+    }
+
+    // Return an item
+    public void returnItem(String title) {
+        LibraryItem item = search(title);
+        if (item == null) {
+            System.out.println("Item not found.");
+            return;
+        }
+        item.returnItem();
+        System.out.println("Attempted to return \"" + title + "\".");
+    }
+}
+
+// Main class to demonstrate functionality
+public class LibraryManagementSystem {
+    public static void main(String[] args) {
+        Library library = new Library();
+
+        // Add items to the library
+        library.addItem(new Book("Harry Potter", "B001", "J.K. Rowling", "Fantasy"));
+        library.addItem(new Book("1984", "B002", "George Orwell", "Dystopian"));
+        library.addItem(new DVD("Inception", "D001", "Christopher Nolan", 148));
+        library.addItem(new DVD("The Matrix", "D002", "Lana Wachowski", 136));
+
+        // Display all items
+        library.displayAllItems();
+
+        // Borrow a book
+        library.borrowItem("Harry Potter");
+
+        // Attempt to borrow the same book again
+        library.borrowItem("Harry Potter");
+
+        // Return the book
+        library.returnItem("Harry Potter");
+
+        // Search for an item
+        LibraryItem item = library.search("1984");
+        if (item != null) {
+            System.out.println("Found item: " + item);
+        } else {
+            System.out.println("Item not found.");
+        }
+
+        // Borrow a DVD
+        library.borrowItem("Inception");
+
+        // Display all items after operations
+        library.displayAllItems();
+    }
+}
