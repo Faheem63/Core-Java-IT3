@@ -1,0 +1,107 @@
+// Base class
+class ClassA {
+    private int valueA;
+
+    // Parameterized constructor
+    public ClassA(int valueA) {
+        this.valueA = valueA;
+        System.out.println("ClassA constructor called");
+    }
+
+    // Copy constructor
+    public ClassA(ClassA other) {
+        this.valueA = other.valueA;
+    }
+
+    // Getter and setter for valueA
+    public int getValueA() {
+        return valueA;
+    }
+
+    public void setValueA(int valueA) {
+        this.valueA = valueA;
+    }
+}
+
+// Intermediate class
+class ClassB extends ClassA {
+    protected int valueB;
+
+    // Private constructor to prevent direct instantiation
+    private ClassB(int valueA, int valueB) {
+        super(valueA); // Calling ClassA's constructor
+        this.valueB = valueB;
+        System.out.println("ClassB constructor called");
+    }
+
+    // Factory method to create ClassB objects
+    public static ClassB createInstance(int valueA, int valueB) {
+        return new ClassB(valueA, valueB);
+    }
+
+    // Copy constructor
+    public ClassB(ClassB other) {
+        super(other); // Calling ClassA's copy constructor
+        this.valueB = other.valueB;
+    }
+
+    // Getter and setter for valueB
+    public int getValueB() {
+        return valueB;
+    }
+
+    public void setValueB(int valueB) {
+        this.valueB = valueB;
+    }
+}
+
+// Derived class
+class ClassC extends ClassB {
+    private int valueC;
+
+    // Parameterized constructor
+    public ClassC(int valueA, int valueB, int valueC) {
+        super(valueA, valueB); // Calling ClassB's constructor
+        this.valueC = valueC;
+        System.out.println("ClassC constructor called");
+    }
+
+    // Copy constructor
+    public ClassC(ClassC other) {
+        super(other); // Calling ClassB's copy constructor
+        this.valueC = other.valueC;
+    }
+
+    // Getter and setter for valueC
+    public int getValueC() {
+        return valueC;
+    }
+
+    public void setValueC(int valueC) {
+        this.valueC = valueC;
+    }
+
+    // Synchronized method to display all instance variables
+    public synchronized void displayValues() {
+        System.out.println("ValueA: " + getValueA()); // Accessing via getter
+        System.out.println("ValueB: " + getValueB());
+        System.out.println("ValueC: " + valueC);
+    }
+}
+
+// Main class to test the program
+public class MultiClassProgram {
+    public static void main(String[] args) {
+        // Creating an object of ClassC
+        ClassC objC1 = new ClassC(10, 20, 30);
+
+        // Displaying values
+        objC1.displayValues();
+
+        // Copying objC1 into a new object objC2
+        ClassC objC2 = new ClassC(objC1);
+
+        // Displaying values of the copied object
+        objC2.displayValues();
+    }
+}
