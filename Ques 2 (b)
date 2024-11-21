@@ -1,0 +1,149 @@
+import java.io.*;
+import java.nio.file.*;
+
+class InvalidCompressionFormatException extends Exception {
+    public InvalidCompressionFormatException(String message) {
+        super(message);
+    }
+}
+
+public class FileCompressionDecompression {
+
+    // Method for compressing a text file using Run-Length Encoding (RLE)
+    public void compressTextFile(String inputFilePath, String outputFilePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFilePath));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath))) {
+
+            StringBuilder input = new StringBuilder();
+            String line;
+
+            // Read the entire file content
+            while ((line = reader.readLine()) != null) {
+                input.append(line).append("\n");
+            }
+
+            // Perform RLE compression
+            String compressedData = compress(input.toString());
+            writer.write(compressedData);
+
+            // Log file sizes
+            logFileSizes(inputFilePath, outputFilePath);
+
+            System.out.println("Compression successful. Compressed data written to: " + outputFilePath);
+
+        } catch (IOException e) {
+            System.err.println("Error during compression: " + e.getMessage());
+        }
+    }
+
+    // Method for decompressing a text file
+    public void decompressTextFile(String inputFilePath, String outputFilePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFilePath));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath))) {
+
+            StringBuilder compressedData = new StringBuilder();
+            String line;
+
+            // Read the entire compressed file content
+            while ((line = reader.readLine()) != null) {
+                compressedData.append(line).append("\n");
+            }
+
+            // Perform RLE decompression
+            String decompressedData = decompress(compressedData.toString());
+            writer.write(decompressedData);
+
+            System.out.println("Decompression successful. Decompressed data written to: " + outputFilePath);
+
+        } catch (InvalidCompressionFormatException e) {
+            System.err.println("Decompression failed: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error during decompression: " + e.getMessage());
+        }
+    }
+
+    // Helper method to compress a string using RLE
+    private String compress(String data) {
+        StringBuilder compressed = new StringBuilder();
+        int n = data.length();
+
+        for (int i = 0; i < n; i++) {
+            int count = 1;
+            while (i < n - 1 && data.charAt(i) == data.charAt(i + 1)) {
+                count++;
+                i++;
+            }
+            compressed.append(data.charAt(i)).append(count);
+        }
+        return compressed.toString();
+    }
+
+    // Helper method to decompress a string using RLE
+    private String decompress(String data) throws InvalidCompressionFormatException {
+        StringBuilder decompressed = new StringBuilder();
+        int n = data.length();
+
+        for (int i = 0; i < n; i++) {
+            char ch = data.charAt(i);
+            StringBuilder countStr = new StringBuilder();
+
+            // Read the count after the character
+            while (i + 1 < n && Character.isDigit(data.charAt(i + 1))) {
+                countStr.append(data.charAt(++i));
+            }
+
+            if (countStr.length() == 0) {
+                throw new InvalidCompressionFormatException("Invalid compression format at index " + i);
+            }
+
+            int count = Integer.parseInt(countStr.toString());
+            decompressed.append(String.valueOf(ch).repeat(count));
+        }
+        return decompressed.toString();
+    }
+
+    // Log file sizes
+    private void logFileSizes(String originalFilePath, String newFilePath) {
+        try {
+            long originalSize = Files.size(Paths.get(originalFilePath));
+            long newSize = Files.size(Paths.get(newFilePath));
+
+            System.out.println("Original file size: " + originalSize + " bytes");
+            System.out.println("New file size: " + newSize + " bytes");
+        } catch (IOException e) {
+            System.err.println("Error logging file sizes: " + e.getMessage());
+        }
+    }
+
+    // Method overloading for binary files
+    public void compressBinaryFile(String inputFilePath, String outputFilePath) {
+        // Implementation for binary compression (not RLE, specific to binary logic)
+        System.out.println("Binary compression feature is not implemented yet.");
+    }
+
+    public void decompressBinaryFile(String inputFilePath, String outputFilePath) {
+        // Implementation for binary decompression
+        System.out.println("Binary decompression feature is not implemented yet.");
+    }
+
+    // Main method
+    public static void main(String[] args) {
+        FileCompressionDecompression utility = new FileCompressionDecompression();
+
+        String inputFilePath = "input.txt"; // Replace with the path to your input file
+        String compressedFilePath = "compressed.txt";
+        String decompressedFilePath = "decompressed.txt";
+
+        // Perform compression and decompression
+        utility.compressTextFile(inputFilePath, compressedFilePath);
+        utility.decompressTextFile(compressedFilePath, decompressedFilePath);
+
+        // Verify decompressed file matches the original
+        try {
+            boolean isIdentical = Files.mismatch(Paths.get(inputFilePath), Paths.get(decompressedFilePath)) == -1;
+            System.out.println("Decompressed file matches original: " + isIdentical);
+        } catch (IOException e) {
+            System.err.println("Error verifying decompressed file: " + e.getMessage());
+        }
+    }
+}
