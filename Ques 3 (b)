@@ -1,0 +1,140 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class ConcurrentModificationDemo {
+
+    public static void main(String[] args) {
+        System.out.println("Demonstrating ConcurrentModificationException with ArrayList:");
+        demonstrateConcurrentModificationException();
+
+        System.out.println("\nResolving with CopyOnWriteArrayList:");
+        resolveWithCopyOnWriteArrayList();
+
+        System.out.println("\nResolving with Explicit Synchronization:");
+        resolveWithExplicitSynchronization();
+    }
+
+    // Demonstrates ConcurrentModificationException with a standard ArrayList
+    private static void demonstrateConcurrentModificationException() {
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            list.add(i);
+        }
+
+        Thread thread1 = new Thread(() -> {
+            try {
+                for (Integer num : list) {
+                    System.out.println(Thread.currentThread().getName() + " - Read: " + num);
+                    Thread.sleep(100); // Simulate work
+                }
+            } catch (Exception e) {
+                System.err.println("Exception in " + Thread.currentThread().getName() + ": " + e);
+            }
+        });
+
+        Thread thread2 = new Thread(() -> {
+            try {
+                Thread.sleep(200); // Allow thread1 to start iterating
+                list.add(6);
+                System.out.println(Thread.currentThread().getName() + " - Added: 6");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        thread1.start();
+        thread2.start();
+
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Resolves ConcurrentModificationException using CopyOnWriteArrayList
+    private static void resolveWithCopyOnWriteArrayList() {
+        List<Integer> list = new CopyOnWriteArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            list.add(i);
+        }
+
+        Thread thread1 = new Thread(() -> {
+            for (Integer num : list) {
+                System.out.println(Thread.currentThread().getName() + " - Read: " + num);
+                try {
+                    Thread.sleep(100); // Simulate work
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        Thread thread2 = new Thread(() -> {
+            try {
+                Thread.sleep(200); // Allow thread1 to start iterating
+                list.add(6);
+                System.out.println(Thread.currentThread().getName() + " - Added: 6");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        thread1.start();
+        thread2.start();
+
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Resolves ConcurrentModificationException using explicit synchronization
+    private static void resolveWithExplicitSynchronization() {
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            list.add(i);
+        }
+
+        Object lock = new Object();
+
+        Thread thread1 = new Thread(() -> {
+            synchronized (lock) {
+                for (Integer num : list) {
+                    System.out.println(Thread.currentThread().getName() + " - Read: " + num);
+                    try {
+                        Thread.sleep(100); // Simulate work
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+        Thread thread2 = new Thread(() -> {
+            synchronized (lock) {
+                try {
+                    Thread.sleep(200); // Allow thread1 to start iterating
+                    list.add(6);
+                    System.out.println(Thread.currentThread().getName() + " - Added: 6");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread1.start();
+        thread2.start();
+
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
