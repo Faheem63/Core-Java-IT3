@@ -1,0 +1,111 @@
+// Main outer class
+public class OuterClass {
+
+    // Static variable and instance variable
+    private static int staticVar = 100;
+    private int instanceVar = 200;
+
+    // Static nested class
+    public static class StaticNestedClass {
+
+        static {
+            System.out.println("Static block in StaticNestedClass");
+        }
+
+        {
+            System.out.println("Instance block in StaticNestedClass");
+        }
+
+        // Constructor
+        public StaticNestedClass() {
+            System.out.println("Constructor of StaticNestedClass");
+        }
+
+        // Access static and instance variables of OuterClass
+        public void accessOuterClass() {
+            System.out.println("Accessing staticVar from OuterClass: " + staticVar);
+
+            // Uncommenting the following line will cause an error because instanceVar is not static
+            // System.out.println("Accessing instanceVar from OuterClass: " + instanceVar);
+        }
+
+        // Using OuterClass.this to refer to the outer class instance
+        public void showOuterInstance() {
+            // Cannot use OuterClass.this directly in a static context
+            System.out.println("StaticNestedClass cannot directly refer to OuterClass.this");
+        }
+    }
+
+    // Final nested inner class
+    public final class FinalNestedClass {
+        private final int finalVariable = 42; // Final variable
+
+        // Constructor
+        public FinalNestedClass() {
+            System.out.println("FinalNestedClass created");
+        }
+
+        // Final method
+        public final void displayFinal() {
+            System.out.println("Final variable: " + finalVariable);
+        }
+    }
+
+    // Overriding toString method from Object
+    @Override
+    public String toString() {
+        return "OuterClass [staticVar=" + staticVar + ", instanceVar=" + instanceVar + "]";
+    }
+
+    // Static method in OuterClass
+    public static void demonstrateStaticAccess() {
+        System.out.println("Accessing static variable in static method: " + staticVar);
+
+        // Cannot access instance variables in a static method
+        // System.out.println("Accessing instance variable: " + instanceVar); // This would cause an error
+    }
+
+    // Synchronized block to demonstrate thread-safe access
+    public void threadSafeAccess() {
+        synchronized (OuterClass.class) {
+            staticVar++;
+            System.out.println("Thread-safe increment of staticVar: " + staticVar);
+        }
+    }
+
+    // Main method to demonstrate functionality
+    public static void main(String[] args) {
+        // Accessing static nested class
+        StaticNestedClass staticNested = new StaticNestedClass();
+        staticNested.accessOuterClass();
+        staticNested.showOuterInstance();
+
+        // Accessing final nested inner class
+        OuterClass outer = new OuterClass();
+        FinalNestedClass finalInner = outer.new FinalNestedClass();
+        finalInner.displayFinal();
+
+        // Demonstrating toString and synchronized block
+        System.out.println(outer);
+        outer.threadSafeAccess();
+
+        // Demonstrating static method
+        OuterClass.demonstrateStaticAccess();
+    }
+}
+
+// Utility class
+final class UtilityClass {
+
+    private UtilityClass() {
+        // Private constructor to prevent instantiation
+    }
+
+    public static void utilityMethod1() {
+        System.out.println("Utility method 1 called");
+    }
+
+    public static void utilityMethod2() {
+        System.out.println("Utility method 2 called");
+    }
+}
